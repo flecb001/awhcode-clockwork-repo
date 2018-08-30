@@ -1,0 +1,183 @@
+﻿<script>
+    function InitGrid() {
+        $("#grid-data").bootgrid({
+            ajax: true,
+            navigation: 2,
+            sorting: false,
+            ajaxSettings: {
+                method: "GET",
+                cache: false
+            },
+            url: "http://127.0.0.1:5000/api/currenttimeentries"
+        });
+    }
+
+    function LoadTimeZoneList() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var timeZoneObject = JSON.parse(this.responseText);
+                var timezones = "";
+                for (var cnt = 0; cnt < timeZoneObject.length; cnt++) {
+                    timezones += (timeZoneObject[cnt].StandardName === "Eastern Standard Time" ?
+                        "<option selected value='" + timeZoneObject[cnt].Id + "'>" + timeZoneObject[cnt].Id + "</option>" :
+                        "<option value='" + timeZoneObject[cnt].Id + "'>" + timeZoneObject[cnt].Id + "</option>");
+                } 
+                document.getElementById("timezone").innerHTML = timezones;
+            }
+        };
+        xhttp.open("GET", "http://127.0.0.1:5000/api/timezones", true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send();
+    }
+
+    function UserAction() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+
+                var response = jQuery.parseJSON(this.responseText);
+                var localTime = new Date(response.utcTime);
+
+                document.getElementById("output").innerHTML = localTime;
+            }
+        };
+
+        var selectedTimeZone = window.$(".timezone option:selected").val();
+        xhttp.open("GET", "http://127.0.0.1:5000/api/currenttime?timezone=" + selectedTimeZone, true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send();
+
+        $("#grid-data").bootgrid("reload");
+    }
+</script>
+
+<!-- Header -->
+<header id="header" class="alt">
+    <div class="logo"><a href="/Home/Index">ClockWork <span>by Brad Flechtner</span></a></div>
+</header>
+
+<!-- Banner -->
+<section id="banner">
+    <div class="inner">
+        <header>
+            <h1>This is ClockWork</h1>
+            <h2>AWH Clockwork Project @ViewData["Version"] on @ViewData["Runtime"]!</h2>
+        </header>
+        <div>
+            <select class="timezone" id="timezone"></select>
+        </div>
+        <div>
+            <a href="#main" class="button big scrolly" onclick="UserAction()">Get the time</a>
+        </div>
+    </div>
+</section>
+
+<!-- Main -->
+<div id="main">
+
+    <!-- Section -->
+    <section class="wrapper style1">
+        <div class="inner">
+            <!-- 2 Columns -->
+            <div class="flex flex-2">
+                <div class="col col1">
+                    <div class="image round fit">
+                        <img src="/Content/images/4.jpg" alt="" />
+                    </div>
+                </div>
+                <div class="col col2">
+                    <h3>Curabitur eget placerat nibh, sed hendrerit libero.</h3>
+                    <p id="output"></p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque in congue enim. Nullam porttitor commodo elit et auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer venenatis euismod efficitur. Maecenas vitae iaculis leo, et imperdiet diam. Morbi luctus mauris vel augue pretium, ut euismod lacus venenatis. Aliquam laoreet interdum lectus, ac congue odio cursus et. Proin ac nisi dui. Vestibulum non felis risus.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section -->
+    <section class="wrapper style2">
+        <div class="inner">
+            <div class="flex flex-2">
+                <div class="col col2">
+                    <h3>Curabitur eget placerat nibh, sed hendrerit libero.</h3>
+                    <p id="output"></p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque in congue enim. Nullam porttitor commodo elit et auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer venenatis euismod efficitur. Maecenas vitae iaculis leo, et imperdiet diam. Morbi luctus mauris vel augue pretium, ut euismod lacus venenatis. Aliquam laoreet interdum lectus, ac congue odio cursus et. Proin ac nisi dui. Vestibulum non felis risus.</p>
+                </div>
+                <div class="col col1 first">
+                    <div class="image round fit">
+                        <img src="/Content/images/5.jpg" alt="" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section -->
+    <section class="wrapper style1">
+        <div class="inner">
+            <div class="flex flex-3">
+                <div class="col align-center">
+                    <div class="image round fit">
+                        <img src="/Content/images/1.jpg" alt="" />
+                    </div>
+                    <p>Donec mollis, nulla sit amet consequat congue, orci dui ornare magna, quis vulputate ex risus et enim.</p>
+                </div>
+                <div class="col align-center">
+                    <div class="image round fit">
+                        <img src="/Content/images/2.jpg" alt="" />
+                    </div>
+                    <p>Aliquam ac fermentum neque, eget ornare mauris. Ut eros ipsum, fringilla id ullamcorper non, aliquet at mauris.</p>
+                </div>
+                <div class="col align-center">
+                    <div class="image round fit">
+                        <img src="/Content/images/3.jpg" alt="" />
+                    </div>
+                    <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+                </div>
+            </div>
+            <div class="align-center">
+                <h2>Donec pharetra metus in felis bibendum feugiat.</h2>
+                <a class="button small" onclick="$('#grid-data').bootgrid('reload');">Refresh History</a>
+                <br />
+                <br />
+                <table id="grid-data" class="table table-condensed table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th data-column-id="ClientIp" data-sortable="false">Client Ip</th>
+                            <th data-column-id="Time" data-sortable="false">Server Time</th>
+                            <th data-column-id="UTCTime" data-sortable="false">UTC Time</th>
+                            <th data-column-id="TZTime" data-sortable="false">TZ Time</th>
+                            <th data-column-id="TimeZone" data-sortable="false">Time Zone</th>
+                        </tr>
+                    </thead>
+                </table>
+                <br />
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer">
+    <div class="copyright">
+        <p>Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="http://awh.net/">AWH.net</a>.</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="/Content/assets/js/jquery.min.js"></script>
+<script src="/Content/assets/js/jquery.scrolly.min.js"></script>
+<script src="/Content/assets/js/jquery.scrollex.min.js"></script>
+<script src="/Content/assets/js/skel.min.js"></script>
+<script src="/Content/assets/js/util.js"></script>
+<script src="/Content/assets/js/main.js"></script>
+<script src="/Content/assets/js/jquery.bootgrid.fa.js"></script>
+<script src="/Content/assets/js/jquery.bootgrid.js"></script>
+
+<script>
+    LoadTimeZoneList();
+
+    InitGrid();
+</script>
