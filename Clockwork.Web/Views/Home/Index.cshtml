@@ -37,9 +37,13 @@
             if (this.readyState == 4 && this.status == 200) {
 
                 var response = jQuery.parseJSON(this.responseText);
-                var localTime = new Date(response.utcTime);
+                var localTime = new Date(Date.parse(response.tzTime));
+                var selectedTimeZone = window.$(".timezone option:selected").val();
+                var displayDate = localTime.getFullYear() + "-" + localTime.getMonth() + "-" + localTime.getDay() + " "
+                    + localTime.getHours() + ":" + localTime.getMinutes() + ":" + localTime.getSeconds() + " "
+                    + selectedTimeZone;
 
-                document.getElementById("output").innerHTML = localTime;
+                document.getElementById("output").innerHTML = displayDate;
             }
         };
 
